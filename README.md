@@ -7,8 +7,8 @@ CompatD opens as a full-window GTK app. Its colour theme follows the distributio
 | Distribution | Theme |
 |---|---|
 | Kali Linux | dark, Kali blue |
-| Debian | light, Debian red header |
-| MX Linux | light, slate and steel blue |
+| Debian | dark grey, Debian red header and accent |
+| MX Linux | grey, steel-blue accent |
 | LMDE | dark, mint green |
 | anything else | dark, neutral teal |
 

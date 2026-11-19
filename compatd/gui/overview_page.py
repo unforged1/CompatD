@@ -18,6 +18,11 @@ class OverviewPage(Gtk.ScrolledWindow):
         self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         box = w.page_box()
         self.add(box)
+        # Paint the scroller and its viewport too, so no unthemed strip shows around the page.
+        w.add_class(self, "cd-page")
+        viewport = self.get_child()
+        w.add_class(viewport, "cd-page")
+        viewport.set_shadow_type(Gtk.ShadowType.NONE)
         d = win.distro
         box.pack_start(w.page_header("System overview", "What CompatD found on this device. Press F5 to refresh, F11 for fullscreen."), False, False, 0)
 

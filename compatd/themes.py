@@ -23,35 +23,35 @@ PALETTES: Dict[str, Dict[str, object]] = {
         "terminal_fg": "#9fd0ff",
     },
     "debian": {
-        "dark": False,
-        "bg": "#f5f3f4",
-        "surface": "#ffffff",
-        "surface2": "#f0e9ec",
-        "border": "#e0d3d8",
-        "fg": "#2a1f23",
-        "muted": "#7a6870",
+        "dark": True,
+        "bg": "#1f1d1e",
+        "surface": "#2a2729",
+        "surface2": "#343032",
+        "border": "#453f42",
+        "fg": "#ece6e8",
+        "muted": "#a3979c",
         "header": "#a80030",
         "header_fg": "#ffffff",
         "accent": "#d70a53",
         "accent_fg": "#ffffff",
-        "accent_soft": "rgba(215,10,83,0.10)",
-        "terminal_bg": "#2a1f23",
+        "accent_soft": "rgba(215,10,83,0.20)",
+        "terminal_bg": "#151314",
         "terminal_fg": "#ffd9e5",
     },
     "mx": {
-        "dark": False,
-        "bg": "#eef1f5",
-        "surface": "#ffffff",
-        "surface2": "#e3e8ef",
-        "border": "#cdd5df",
-        "fg": "#1c2430",
-        "muted": "#64748b",
+        "dark": True,
+        "bg": "#303338",
+        "surface": "#3a3e44",
+        "surface2": "#43484f",
+        "border": "#525860",
+        "fg": "#e8ebef",
+        "muted": "#a7afba",
         "header": "#1f2a36",
         "header_fg": "#f1f5f9",
-        "accent": "#2e7bcf",
+        "accent": "#3b8be0",
         "accent_fg": "#ffffff",
-        "accent_soft": "rgba(46,123,207,0.12)",
-        "terminal_bg": "#1f2a36",
+        "accent_soft": "rgba(59,139,224,0.20)",
+        "terminal_bg": "#1f2429",
         "terminal_fg": "#cfe3ff",
     },
     "lmde": {
@@ -128,6 +128,7 @@ window.compatd, window.compatd > .background, .compatd .cd-page { background-col
 .compatd label { color: inherit; }
 .compatd scrolledwindow, .compatd viewport, .compatd stack { background-color: @cd_bg; }
 .compatd scrolledwindow.cd-framed { background-color: @cd_surface; }
+.compatd .cd-page-pad { padding: 24px; }
 
 .compatd headerbar {
   background-image: none; background-color: @cd_header; color: @cd_header_fg;

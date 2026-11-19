@@ -122,6 +122,6 @@ def scrolled(child: Gtk.Widget, framed: bool = True) -> Gtk.ScrolledWindow:
 
 def page_box() -> Gtk.Box:
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-    box.set_border_width(24)
-    add_class(box, "cd-page")
+    # CSS padding (not set_border_width) so the themed background covers the whole page.
+    add_class(box, "cd-page", "cd-page-pad")
     return box

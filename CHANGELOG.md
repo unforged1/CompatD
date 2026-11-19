@@ -4,7 +4,7 @@
 First pre-release.
 
 - Full-window GTK 3 interface with Overview, Drivers, Compatibility, Options and Activity pages.
-- The theme follows the distribution (Kali, Debian, MX Linux, LMDE, other). You can override it and force dark or light mode.
+- The theme follows the distribution (Kali, Debian, MX Linux, LMDE, other). Every default theme is dark. You can override it and force dark or light mode.
 - Hardware detection from lspci and sysfs, showing the driver in use and the available kernel modules.
 - Driver and firmware recommendations, installed through pkexec. Simulate (apt-get -s) and copy-commands modes are included.
 - Device compatibility checks: unbound devices, missing firmware, repository mix-ups, dpkg health, DKMS, Secure Boot and Wayland.

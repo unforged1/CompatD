@@ -18,6 +18,11 @@ class OptionsPage(Gtk.ScrolledWindow):
         self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         box = w.page_box()
         self.add(box)
+        # Paint the scroller and its viewport too, so no unthemed strip shows around the page.
+        w.add_class(self, "cd-page")
+        viewport = self.get_child()
+        w.add_class(viewport, "cd-page")
+        viewport.set_shadow_type(Gtk.ShadowType.NONE)
         cfg = win.config
         box.pack_start(w.page_header("Options", "Settings are saved automatically to %s" % config_path()), False, False, 0)
 
