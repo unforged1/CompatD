@@ -1,0 +1,9 @@
+#!/bin/sh
+# CompatD launcher. Uses the installed copy in /usr/lib/compatd, or the source tree next to this script.
+here="$(dirname "$(readlink -f "$0")")"
+if [ -d "$here/../compatd" ]; then
+    export PYTHONPATH="$here/..${PYTHONPATH:+:$PYTHONPATH}"
+else
+    export PYTHONPATH="/usr/lib/compatd${PYTHONPATH:+:$PYTHONPATH}"
+fi
+exec python3 -m compatd "$@"

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=CompatD
+GenericName=Driver & Compatibility Manager
+Comment=Find drivers and fix compatibility problems on Debian-based systems
+Exec=compatd
+Icon=compatd
+Terminal=false
+Categories=System;Settings;HardwareSettings;PackageManager;
+Keywords=driver;firmware;nvidia;compatibility;library;wine;
+StartupNotify=true
+StartupWMClass=compatd
