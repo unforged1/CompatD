@@ -11,6 +11,7 @@ First pre-release.
 - Directory scanner with a built-in ELF parser. It finds wrong architectures, missing libraries, too-new glibc, foreign loaders, AppImage FUSE problems, kernel module vermagic mismatches, script interpreter problems, Python 2 code, broken launchers and services, .deb dependency problems, foreign package formats, and Windows/macOS programs with native alternatives.
 - Markdown and JSON report export, a CLI (`info`, `drivers`, `system`, `scan`) and a .deb builder.
 
+- The header lists every GPU next to the theme badge, labelled iGPU, dGPU, eGPU (Thunderbolt/USB4) or vGPU, with short names such as NVIDIA RTX 4060, INTEL ARC A770 or RADEON 680M. The GPU rendering the desktop is marked; it comes from the OpenGL renderer or, without glxinfo, from the GPU driving the display. GPUs without a driver are flagged. `compatd info` prints the same. The theme badge no longer says "theme".
 - License dialog in the main menu with the GPLv3 logo, copyright notice and full license text. About now shows the copyright holder (unforged1).
 
 ### Fixes from LMDE 7 testing

@@ -66,9 +66,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     dist = distro_mod.detect()
 
     if args.cmd == "info":
-        from . import hardware
+        from . import gpu, hardware
 
         data = {"distro": dist.pretty_name, "family": dist.family, "theme": dist.label, **hardware.summary()}
+        devices = hardware.all_devices()
+        active = gpu.active_gpu(devices)
+        if active:
+            data["gpu"] = active.name
+            data["gpu_source"] = active.source
+            data["gpus"] = ", ".join(
+                "%s %s%s" % (e.role, e.name, " (active)" if e.active else "") for e in gpu.all_gpus(devices, active)
+            )
         if args.json:
             print(json.dumps(data, indent=2))
         else:

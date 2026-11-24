@@ -13,7 +13,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
-from .. import __app_id__, __app_name__, __copyright__, __version__, data_file, distro, license_text, themes  # noqa: E402
+from .. import __app_id__, __app_name__, __copyright__, __version__, data_file, distro, gpu, license_text, themes  # noqa: E402
 from ..actions import Runner  # noqa: E402
 from ..config import Config  # noqa: E402
 from ..models import Action  # noqa: E402
@@ -72,6 +72,10 @@ class MainWindow(Gtk.ApplicationWindow):
         self.badge = w.label("", "cd-distro-badge", xalign=0.5)
         self.badge.set_valign(Gtk.Align.CENTER)
         hb.pack_start(self.badge)
+        self.gpu_box = Gtk.Box(spacing=6)  # one pill per GPU, filled in once hardware is detected
+        self.gpu_box.set_valign(Gtk.Align.CENTER)
+        self.gpu_box.set_margin_start(6)
+        hb.pack_start(self.gpu_box)
 
         menu = Gio.Menu()
         menu.append("Refresh everything", "win.refresh")
@@ -186,7 +190,8 @@ class MainWindow(Gtk.ApplicationWindow):
         if settings is not None:
             settings.set_property("gtk-application-prefer-dark-theme", bool(pal["dark"]))
         self._css.load_from_data(themes.css(fam, self.config.dark_mode).encode("utf-8"))
-        self.badge.set_text(distro.FAMILY_LABELS.get(fam, "Other") + (" theme" if self.config.theme != "auto" else ""))
+        self.badge.set_text(distro.FAMILY_LABELS.get(fam, "Other"))
+        self.badge.set_tooltip_text("%s theme (%s)" % (distro.FAMILY_LABELS.get(fam, "Other"), "automatic" if self.config.theme == "auto" else "chosen in Options"))
         self.sev_colors = themes.severity_colors(bool(pal["dark"]))
         if hasattr(self, "compat"):
             self.compat.recolor()
@@ -311,6 +316,51 @@ class MainWindow(Gtk.ApplicationWindow):
         self.devices = devices
         self.recommendations = recs
         self.overview.update_hardware(devices, recs)
+        def work():
+            active = gpu.active_gpu(devices)
+            return active, gpu.all_gpus(devices, active)
+
+        w.run_async(work, self._show_gpus)
+
+    _ROLE_TEXT = {
+        "iGPU": "Integrated GPU (part of the CPU)",
+        "dGPU": "Discrete GPU",
+        "eGPU": "External GPU (Thunderbolt/USB4)",
+        "vGPU": "Virtual machine GPU",
+    }
+
+    def _show_gpus(self, result, err: Optional[BaseException]) -> None:
+        for child in self.gpu_box.get_children():
+            self.gpu_box.remove(child)
+        if err is not None or not result or not result[1]:
+            return
+        active, entries = result
+        multi = len(entries) > 1
+        for e in entries:
+            text = "%s · %s" % (e.role, e.name)
+            if multi and e.active:
+                text = "\u25cf " + text  # ● marks the GPU rendering the desktop
+            if not e.device.driver:
+                text += " · NO DRIVER"
+            pill = w.label(text, "cd-gpu-badge", xalign=0.5)
+            ctx = pill.get_style_context()
+            vendor = {gpu.NVIDIA: "nvidia", gpu.AMD: "amd", gpu.INTEL: "intel"}.get(e.vendor_id)
+            if vendor:
+                ctx.add_class("cd-gpu-" + vendor)
+            if e.active:
+                ctx.add_class("cd-gpu-active")
+            if not e.device.driver:
+                ctx.add_class("cd-gpu-nodriver")
+            tip = ["%s: %s" % (self._ROLE_TEXT.get(e.role, e.role), e.device.label), "Driver: %s" % (e.device.driver or "none (see Drivers)")]
+            if e.active:
+                tip.append("Renders the desktop (detected from: %s)" % active.source)
+            elif e.device.driver:
+                tip.append("Not rendering the desktop; available to apps that request it (PRIME offload)" if e.role in ("dGPU", "eGPU") else "Not rendering the desktop")
+            if e.alternatives:
+                tip.append("lspci lists several models for this chip (%s). Install mesa-utils so CompatD can read the exact model." % e.alternatives)
+            pill.set_tooltip_text("\n".join(tip))
+            self.gpu_box.pack_start(pill, False, False, 0)
+        self.gpu_box.show_all()
 
     # -- actions ------------------------------------------------------------------------------
     def log(self, line: str) -> None:

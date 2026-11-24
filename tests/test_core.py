@@ -13,10 +13,10 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from compatd import distro, elfinfo, packages, themes  # noqa: E402
+from compatd import distro, elfinfo, gpu, packages, themes  # noqa: E402
 from compatd.actions import build_argv  # noqa: E402
 from compatd.config import Config  # noqa: E402
-from compatd.models import Action, Finding  # noqa: E402
+from compatd.models import Action, Device, Finding  # noqa: E402
 from compatd.report import write_report  # noqa: E402
 from compatd.scanner import ScanOptions, Scanner, _unmet_depends, fix_all_action  # noqa: E402
 from compatd import syscheck  # noqa: E402
@@ -276,6 +276,99 @@ class RepoTests(unittest.TestCase):
             old_kernel_packages(pkgs, "6.12.117+deb13-amd64"),
             ["linux-image-6.12.48+deb13-amd64", "linux-headers-6.12.48+deb13-common", "linux-kbuild-6.12.48+deb13"],
         )
+
+
+def gpu_dev(slot, vid, name, driver):
+    return Device("pci", slot, "0300", "VGA compatible controller", vid, "0000", "", name, driver)
+
+
+class GpuTests(unittest.TestCase):
+    def test_names(self):
+        cases = [
+            ("10de", "AD107M [GeForce RTX 4060 Max-Q / Mobile]", "NVIDIA RTX 4060"),
+            ("10de", "NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2", "NVIDIA RTX 4060"),
+            ("10de", "TU116 [GeForce GTX 1660 SUPER]", "NVIDIA GTX 1660 SUPER"),
+            ("10de", "GA104 [GeForce RTX 3070 Ti]", "NVIDIA RTX 3070 TI"),
+            ("10de", "GP107GL [Quadro P1000]", "NVIDIA QUADRO P1000"),
+            ("8086", "DG2 [Arc A770]", "INTEL ARC A770"),
+            ("8086", "Mesa Intel(R) Arc(tm) A750 Graphics (DG2)", "INTEL ARC A750"),
+            ("8086", "TigerLake-LP GT2 [Iris Xe Graphics]", "INTEL IRIS XE"),
+            ("8086", "Mesa Intel(R) UHD Graphics 620 (KBL GT2)", "INTEL UHD 620"),
+            ("1002", "Rembrandt [Radeon 680M]", "RADEON 680M"),
+            ("1002", "AMD Radeon RX 7900 XTX (radeonsi, navi31, LLVM 19)", "RADEON RX 7900 XTX"),
+            ("1002", "Renoir [Radeon Vega Series / Radeon Vega Mobile Series]", "RADEON VEGA"),
+        ]
+        for vid, text, want in cases:
+            self.assertEqual(gpu.gpu_name(vid, text)[0], want, text)
+        self.assertFalse(gpu.gpu_name("1002", "AMD Radeon Graphics (radeonsi, renoir)")[1])
+
+    def test_hybrid_uses_renderer(self):
+        amd = gpu_dev("0000:35:00.0", "1002", "Rembrandt [Radeon 680M]", "amdgpu")
+        nv = gpu_dev("0000:01:00.0", "10de", "AD107M [GeForce RTX 4060 Max-Q / Mobile]", "nvidia")
+        no = lambda slot: False  # noqa: E731
+        info = gpu.active_gpu([nv, amd], renderer="AMD Radeon 680M (radeonsi, rembrandt)", drives_display=no, boot_vga=no)
+        self.assertEqual((info.name, info.source, info.others), ("RADEON 680M", "OpenGL renderer", [("NVIDIA RTX 4060", "nvidia")]))
+        # PRIME "performance" mode: NVIDIA renders the desktop although the iGPU drives the panel.
+        info = gpu.active_gpu([nv, amd], renderer="NVIDIA GeForce RTX 4060 Laptop GPU/PCIe/SSE2",
+                              drives_display=lambda s: s == amd.slot, boot_vga=no)
+        self.assertEqual(info.name, "NVIDIA RTX 4060")
+
+    def test_fallbacks_without_glxinfo(self):
+        intel = gpu_dev("0000:00:02.0", "8086", "Alder Lake-P GT2 [Iris Xe Graphics]", "i915")
+        amd = gpu_dev("0000:03:00.0", "1002", "Navi 21 [Radeon RX 6800/6800 XT / 6900 XT]", "amdgpu")
+        info = gpu.active_gpu([intel, amd], renderer="", drives_display=lambda s: s == amd.slot, boot_vga=lambda s: s == intel.slot)
+        self.assertEqual((info.name, info.source), ("RADEON RX 6800", "connected display"))
+        self.assertIn("6900 XT", info.alternatives)
+        info = gpu.active_gpu([intel, amd], renderer="", drives_display=lambda s: False, boot_vga=lambda s: s == intel.slot)
+        self.assertEqual((info.name, info.source), ("INTEL IRIS XE", "boot GPU"))
+        info = gpu.active_gpu([intel], renderer="llvmpipe (LLVM 19.1.7, 256 bits)", drives_display=lambda s: False, boot_vga=lambda s: False)
+        self.assertIn("software rendering", info.source)
+        self.assertIsNone(gpu.active_gpu([], renderer=""))
+
+
+class GpuRoleTests(unittest.TestCase):
+    def setUp(self):
+        bridge = lambda slot, name: Device("pci", slot, "0604", "PCI bridge", "8086", "0000", "", name)  # noqa: E731
+        self.bridges = [
+            bridge("0000:00:08.1", "Family 17h-19h Internal PCIe GPP Bridge"),
+            bridge("0000:00:01.1", "Family 17h-19h PCIe GPP Bridge"),
+            bridge("0000:05:00.0", "JHL7540 Thunderbolt 3 Bridge [Titan Ridge 4C 2018]"),
+            bridge("0000:06:01.0", "JHL7540 Thunderbolt 3 Bridge [Titan Ridge 4C 2018]"),
+        ]
+        self.parents = {
+            "0000:35:00.0": ["0000:00:08.1"],
+            "0000:01:00.0": ["0000:00:01.1"],
+            "0000:07:00.0": ["0000:06:01.0", "0000:05:00.0", "0000:00:1c.4"],
+            "0000:00:02.0": [],
+        }
+
+    def roles(self, cards, removable=lambda s: False):
+        entries = gpu.all_gpus(self.bridges + cards, None, ancestors=lambda s: self.parents.get(s, []), removable=removable)
+        return [(e.role, e.name) for e in entries]
+
+    def test_amd_apu_plus_nvidia(self):
+        cards = [gpu_dev("0000:01:00.0", "10de", "AD107M [GeForce RTX 4060 Max-Q / Mobile]", "nvidia"),
+                 gpu_dev("0000:35:00.0", "1002", "Rembrandt [Radeon 680M]", "amdgpu")]
+        self.assertEqual(self.roles(cards), [("iGPU", "RADEON 680M"), ("dGPU", "NVIDIA RTX 4060")])
+
+    def test_intel_igpu_dgpu_and_thunderbolt_egpu(self):
+        cards = [gpu_dev("0000:00:02.0", "8086", "Alder Lake-P GT2 [Iris Xe Graphics]", "i915"),
+                 gpu_dev("0000:01:00.0", "8086", "DG2 [Arc A770]", "i915"),
+                 gpu_dev("0000:07:00.0", "1002", "Navi 31 [Radeon RX 7900 XT/7900 XTX/7900 GRE/7900M]", None)]
+        self.assertEqual(self.roles(cards), [("iGPU", "INTEL IRIS XE"), ("dGPU", "INTEL ARC A770"), ("eGPU", "RADEON RX 7900 XT")])
+
+    def test_egpu_from_removable_flag(self):
+        # USB4 enclosure whose bridges have no telling name: the kernel's removable flag decides.
+        self.parents["0000:09:00.0"] = ["0000:08:00.0"]
+        card = gpu_dev("0000:09:00.0", "10de", "GA102 [GeForce RTX 3080]", "nvidia")
+        self.assertEqual(self.roles([card], removable=lambda s: s == "0000:09:00.0"), [("eGPU", "NVIDIA RTX 3080")])
+        self.assertEqual(self.roles([card]), [("dGPU", "NVIDIA RTX 3080")])
+
+    def test_amd_apu_by_code_name_and_vm(self):
+        self.parents["0000:04:00.0"] = ["0000:00:08.1x"]
+        apu = gpu_dev("0000:04:00.0", "1002", "Cezanne [Radeon Vega Series / Radeon Vega Mobile Series]", "amdgpu")
+        vm = gpu_dev("0000:00:0f.0", "15ad", "SVGA II Adapter", "vmwgfx")
+        self.assertEqual(self.roles([apu, vm]), [("iGPU", "RADEON VEGA"), ("vGPU", "VMWARE VIRTUAL GPU")])
 
 
 class MiscTests(unittest.TestCase):

@@ -144,6 +144,15 @@ window.compatd, window.compatd > .background, .compatd .cd-page { background-col
   background-color: @cd_accent; color: @cd_accent_fg; border-radius: 12px;
   padding: 3px 12px; font-weight: bold; font-size: 0.9em;
 }
+.compatd headerbar .cd-gpu-badge {
+  background-color: alpha(#000000, 0.35); color: alpha(@cd_header_fg, 0.75); border: 2px solid alpha(@cd_header_fg, 0.35);
+  border-radius: 12px; padding: 2px 11px; font-weight: bold; font-size: 0.9em;
+}
+.compatd headerbar .cd-gpu-badge.cd-gpu-nvidia { border-color: #76b900; }
+.compatd headerbar .cd-gpu-badge.cd-gpu-amd { border-color: #ed1c24; }
+.compatd headerbar .cd-gpu-badge.cd-gpu-intel { border-color: #00c7fd; }
+.compatd headerbar .cd-gpu-badge.cd-gpu-active { color: @cd_header_fg; background-color: alpha(#000000, 0.6); }
+.compatd headerbar .cd-gpu-badge.cd-gpu-nodriver { border-style: dashed; border-color: #ff6b6b; }
 
 .compatd .cd-sidebar { background-color: @cd_surface; border-right: 1px solid @cd_border; }
 .compatd .cd-sidebar list, .compatd .cd-sidebar row { background-color: transparent; color: @cd_fg; }

@@ -23,6 +23,8 @@ CompatD opens as a full-window GTK app. Its colour theme follows the distributio
 
 You can override the theme and force dark or light mode under **Options**.
 
+Next to the theme name, the header lists every GPU with its role: **iGPU** (integrated), **dGPU** (discrete), **eGPU** (external, over Thunderbolt/USB4) or **vGPU** (virtual machine). For example: `● iGPU · RADEON 680M` `dGPU · NVIDIA RTX 4060`. The ● marks the GPU that renders your desktop, and a dashed red outline marks a GPU with no driver. Hover over a GPU for its driver and details.
+
 ## What it does
 
 ### Drivers
