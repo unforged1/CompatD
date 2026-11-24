@@ -233,6 +233,11 @@ window.compatd, window.compatd > .background, .compatd .cd-page { background-col
 }
 .compatd textview.cd-detail, .compatd textview.cd-detail text { background-color: @cd_surface; color: @cd_fg; }
 .compatd .cd-logo-card { background-color: #ffffff; border-radius: 10px; }
+.compatd infobar.cd-report-bar, .compatd infobar.cd-report-bar > revealer > box {
+  background-image: none; background-color: @cd_surface2; color: @cd_fg; border: none;
+}
+.compatd infobar.cd-report-bar { border-bottom: 2px solid @cd_accent; }
+.compatd infobar.cd-report-bar label { color: @cd_fg; }
 .compatd .cd-banner { background-color: @cd_accent_soft; border: 1px solid @cd_accent; border-radius: 10px; padding: 10px 14px; }
 .compatd separator { background-color: @cd_border; }
 .compatd paned > separator { background-color: @cd_border; min-width: 1px; min-height: 1px; }

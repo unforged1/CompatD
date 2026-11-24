@@ -75,6 +75,18 @@ class OptionsPage(Gtk.ScrolledWindow):
         size.connect("value-changed", lambda s: self._set("max_file_mb", int(s.get_value())))
         self._row(card, "Largest source file to parse (MiB)", "", size)
 
+        # Test reports
+        box.pack_start(w.label("TEST REPORTS", "cd-section"), False, False, 0)
+        card = self._card(box)
+        self._switch(
+            card,
+            "ask_for_reports",
+            "Offer a test report after each update",
+            "Shown once per CompatD version. A report opens as a GitHub issue that you review and submit yourself; nothing is sent automatically.",
+        )
+        send = w.button("Send test report…", "mail-send-symbolic", on_click=win.send_report)
+        self._row(card, "Send a report now", "Review what it contains before anything leaves this computer.", send)
+
         reset = w.button("Restore defaults", "edit-undo-symbolic", on_click=self._reset)
         reset.set_halign(Gtk.Align.START)
         box.pack_start(reset, False, False, 0)

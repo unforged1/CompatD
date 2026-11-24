@@ -6,7 +6,7 @@ By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Ways to help
 
-* **Test on your machine.** Run CompatD on Debian, MX Linux, LMDE or Kali and open a **Hardware test report** issue. Debian and MX haven't been tested on real hardware yet.
+* **Test on your machine.** Run CompatD on Debian, MX Linux, LMDE or Kali, then use **☰ → Send test report…** (or `compatd report --open`). It opens a pre-filled **Hardware test report** issue for you to review and submit. Debian and MX haven't been tested on real hardware yet.
 * **Report bugs.** Open a **Bug report** issue. Wrong detections, bad recommendations and false positives from the scanner all count.
 * **Suggest features.** Open a **Feature request** issue. Explain the problem it solves first.
 * **Send code.** Fix a bug, add a detection rule, or improve a page. See below.

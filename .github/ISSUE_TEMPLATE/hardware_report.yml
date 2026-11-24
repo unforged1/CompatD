@@ -6,6 +6,8 @@ body:
     attributes:
       value: |
         Reports from every machine help, especially Debian and MX Linux, which haven't been tested on real hardware yet.
+
+        The easiest way to fill this in is **☰ → Send test report** in CompatD. It fills in the fields below for you to review.
   - type: dropdown
     id: distro
     attributes:
@@ -36,6 +38,12 @@ body:
     id: system
     attributes:
       label: Output of `compatd system`
+      render: text
+  - type: textarea
+    id: performance
+    attributes:
+      label: Performance and errors
+      description: Filled in automatically by CompatD's "Send test report" (☰ menu). Leave empty if you're not using it.
       render: text
   - type: dropdown
     id: result

@@ -34,6 +34,8 @@ class Config:
     report_broken_links: bool = True
     use_apt_file: bool = False
     last_directory: str = ""
+    ask_for_reports: bool = True  # offer a test report once per CompatD version
+    report_prompted_version: str = ""  # version the offer was last shown for
 
     @classmethod
     def load(cls) -> "Config":

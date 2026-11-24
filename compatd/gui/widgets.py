@@ -35,6 +35,9 @@ def run_async(work: Callable[[], Any], done: Callable[[Any, Optional[BaseExcepti
             res, err = work(), None
         except BaseException as exc:  # noqa: BLE001 - reported to the UI
             res, err = None, exc
+            from .. import perf
+
+            perf.error(getattr(work, "__qualname__", "background task"), exc)
         GLib.idle_add(lambda: (done(res, err), False)[1])
 
     t = threading.Thread(target=target, daemon=True)

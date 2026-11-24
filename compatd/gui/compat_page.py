@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import threading
+import time
 from typing import List, Optional
 
 import gi
@@ -13,7 +14,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, Gio, Gtk, Pango  # noqa: E402
 
-from .. import syscheck  # noqa: E402
+from .. import perf, syscheck  # noqa: E402
 from ..report import write_report  # noqa: E402
 from ..models import SEVERITY_RANK, Finding  # noqa: E402
 from ..scanner import Scanner, describe_action, fix_all_action  # noqa: E402
@@ -206,7 +207,8 @@ class CompatPage(Gtk.Box):
                 w.ui(self._progress, step / 5.0, label or "Finishing…")
 
             def work():
-                return syscheck.run_all(win.distro, devices or None, progress)
+                with perf.timed("Device compatibility check"):
+                    return syscheck.run_all(win.distro, devices or None, progress)
 
         else:
             self.scope_label = path
@@ -221,7 +223,11 @@ class CompatPage(Gtk.Box):
             scanner.progress = progress
 
             def work():
-                return scanner.scan(path)
+                t0 = time.monotonic()
+                try:
+                    return scanner.scan(path)
+                finally:
+                    perf.record("Directory scan", time.monotonic() - t0, "%d files" % scanner.files_scanned)
 
         def done(res, err):
             self.cancel_event = None
@@ -234,6 +240,8 @@ class CompatPage(Gtk.Box):
                 win.log("Scan failed: %r" % err)
                 return
             self.set_findings(res)
+            if device:
+                self.device_findings = res  # reused by test reports
             self.status.set_text("%s: %d finding(s)" % (self.scope_label, len(res)))
             win.log("Scan of %s finished with %d finding(s)" % (self.scope_label, len(res)))
 

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -13,7 +14,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from compatd import distro, elfinfo, gpu, packages, themes  # noqa: E402
+from compatd import distro, elfinfo, gpu, packages, perf, testreport, themes  # noqa: E402
 from compatd.actions import build_argv  # noqa: E402
 from compatd.config import Config  # noqa: E402
 from compatd.models import Action, Device, Finding  # noqa: E402
@@ -369,6 +370,54 @@ class GpuRoleTests(unittest.TestCase):
         apu = gpu_dev("0000:04:00.0", "1002", "Cezanne [Radeon Vega Series / Radeon Vega Mobile Series]", "amdgpu")
         vm = gpu_dev("0000:00:0f.0", "15ad", "SVGA II Adapter", "vmwgfx")
         self.assertEqual(self.roles([apu, vm]), [("iGPU", "RADEON VEGA"), ("vGPU", "VMWARE VIRTUAL GPU")])
+
+
+class TestReportTests(unittest.TestCase):
+    FORM = os.path.join(os.path.dirname(__file__), "..", ".github", "ISSUE_TEMPLATE", "hardware_report.yml")
+
+    def test_fields_match_issue_form(self):
+        with open(self.FORM) as fh:
+            form = fh.read()
+        ids = set(re.findall(r"^\s+id: (\w+)", form, re.M))
+        for key in list(testreport.FIELDS) + ["distro"]:
+            self.assertIn(key, ids)
+        for option in testreport.DISTRO_OPTIONS.values():
+            self.assertIn("- " + option, form)
+
+    def test_scrub(self):
+        words = [("/home/alice", "~"), ("alice", "<user>"), ("alice-laptop", "<host>")]
+        # Longest first: a host name containing the user name is still replaced whole.
+        self.assertEqual(testreport.scrub("/home/alice/x on alice-laptop by alice", words), "~/x on <host> by <user>")
+        self.assertEqual(testreport.scrub("nothing here", words), "nothing here")
+
+    def test_issue_url_prefills_and_shortens(self):
+        report = {"title": "Hardware report: Debian 13", "distro": "Debian", "info": "kernel: 6.12", "drivers": "x" * 50,
+                  "system": "No findings.", "performance": "fast"}
+        url, short = testreport.issue_url(report)
+        self.assertFalse(short)
+        self.assertTrue(url.startswith("https://github.com/unforged1/CompatD/issues/new?template=hardware_report.yml&"))
+        self.assertIn("title=Hardware+report%3A+Debian+13", url)
+        self.assertNotIn("distro=", url)  # GitHub can't pre-fill dropdowns
+        self.assertIn("info=kernel%3A+6.12", url)
+        report["drivers"] = "\n".join("device line %d with a fairly long description" % i for i in range(600))
+        url, short = testreport.issue_url(report)
+        self.assertTrue(short)
+        self.assertLessEqual(len(url), testreport.MAX_URL)
+        self.assertIn("clipboard", url.replace("+", " "))
+        self.assertIn("info=kernel%3A+6.12", url)  # small fields are kept whole
+
+    def test_perf_errors_and_text(self):
+        perf.reset()
+        try:
+            {}["missing"]
+        except KeyError as exc:
+            perf.error("test", exc)
+        perf.record("Directory scan", 2.0, "1000 files")
+        text = testreport._performance()
+        self.assertIn("Errors this session: 1", text)
+        self.assertIn("KeyError", text)
+        self.assertIn("500 files/s", text)
+        perf.reset()
 
 
 class MiscTests(unittest.TestCase):

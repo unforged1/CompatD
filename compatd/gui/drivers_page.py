@@ -11,7 +11,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, Gtk, Pango  # noqa: E402
 
-from .. import drivers, hardware  # noqa: E402
+from .. import drivers, hardware, perf  # noqa: E402
 from ..models import Action, Recommendation  # noqa: E402
 from ..sysutil import shell_join  # noqa: E402
 from . import widgets as w  # noqa: E402
@@ -109,8 +109,10 @@ class DriversPage(Gtk.Box):
         win = self.win
 
         def work():
-            devices = hardware.all_devices()
-            recs = drivers.recommend(devices, win.distro)
+            with perf.timed("Hardware detection"):
+                devices = hardware.all_devices()
+            with perf.timed("Driver recommendations"):
+                recs = drivers.recommend(devices, win.distro)
             return devices, recs
 
         def done(res, err):

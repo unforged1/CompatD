@@ -50,6 +50,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--json", action="store_true")
     p.add_argument("--hidden", action="store_true", help="include hidden files")
     p.add_argument("--apt-file", action="store_true", help="use apt-file to look up missing libraries")
+    p = sub.add_parser("report", help="build a hardware test report and a link to send it as a GitHub issue")
+    p.add_argument("--open", action="store_true", help="open the pre-filled issue in your browser (you still submit it yourself)")
+    p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
     if args.cmd in (None, "gui"):
@@ -118,6 +121,38 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         findings = syscheck.run_all(dist, hardware.all_devices())
         _print_findings(findings, args.json)
+        return 0
+
+    if args.cmd == "report":
+        import time
+
+        from . import drivers, hardware, perf, syscheck, testreport
+
+        t0 = time.monotonic()
+        devices = hardware.all_devices()
+        perf.record("Hardware detection", time.monotonic() - t0)
+        with perf.timed("Driver recommendations"):
+            recs = drivers.recommend(devices, dist)
+        with perf.timed("Device compatibility check"):
+            findings = syscheck.run_all(dist, devices)
+        report = testreport.build(dist, devices, recs, findings)
+        url, shortened = testreport.issue_url(report)
+        if args.json:
+            print(json.dumps({"report": report, "issue_url": url, "shortened": shortened}, indent=2))
+        else:
+            print(testreport.as_text(report))
+            print("Nothing has been sent. To send this report, open the link below, pick %r as the distribution" % report["distro"])
+            print("and an overall result, review the rest and press Submit on GitHub:")
+            print(url)
+            if shortened:
+                print("\nThe report was too long for a link and was shortened; paste the full text above into the issue.")
+        if args.open:
+            from .sysutil import run, which
+
+            if which("xdg-open"):
+                run(["xdg-open", url], timeout=15)
+            else:
+                print("xdg-open not found; open the link yourself.", file=sys.stderr)
         return 0
 
     if args.cmd == "scan":

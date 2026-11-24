@@ -67,6 +67,16 @@ You can apply each fix on its own, or merge them with **Apply all fixes**. That 
 
 Keyboard shortcuts: **F5** refreshes, **F11** toggles fullscreen, **Ctrl+Q** quits.
 
+### Test reports
+CompatD can help you report how it works on your machine. It never sends anything by itself.
+
+* **☰ → Send test report…** (or `compatd report`) collects your distribution, GPUs and drivers, the device check, and how long detection and scans took, plus any errors from this session.
+* You see the whole report first and can edit or delete any part of it. Your user name, host name and home folder are replaced with `<user>`, `<host>` and `~`.
+* **Open on GitHub** opens a pre-filled *Hardware test report* issue in your browser. Nothing is sent until you press **Submit** there, which needs a GitHub account.
+* After each update CompatD offers this once. Turn it off under **Options → Test reports**, or choose **Don't ask again**.
+
+Timings and errors are only kept in memory while CompatD runs. They aren't written to disk.
+
 ## Running
 
 Requirements: Python ≥ 3.9, `python3-gi`, `gir1.2-gtk-3.0`, `pciutils`, `usbutils`, `kmod`, `pkexec`. These are present by default on Kali, Debian desktops, MX and LMDE.
@@ -78,6 +88,7 @@ Requirements: Python ≥ 3.9, `python3-gi`, `gir1.2-gtk-3.0`, `pciutils`, `usbut
 ./bin/compatd drivers         # devices + recommendations
 ./bin/compatd system          # device compatibility check
 ./bin/compatd scan ~/Downloads [--json] [--hidden] [--apt-file]
+./bin/compatd report [--open]      # test report + link to send it on GitHub
 ```
 
 Build and install a package:
