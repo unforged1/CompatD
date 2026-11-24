@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Activity page: live output of every action CompatD runs."""
 from __future__ import annotations
 

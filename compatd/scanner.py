@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Compatibility scanner for files in a directory.
 
 Looks for things that will not run (or not run well) on this Debian-based system and

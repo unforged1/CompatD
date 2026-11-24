@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Distribution detection: Kali, Debian, MX Linux, LMDE or other."""
 from __future__ import annotations
 

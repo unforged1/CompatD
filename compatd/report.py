@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Export scan findings as Markdown or JSON."""
 from __future__ import annotations
 

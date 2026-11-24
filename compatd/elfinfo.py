@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Minimal, dependency-free ELF reader.
 
 Reads only what CompatD needs: class/machine, interpreter, DT_NEEDED, RPATH/RUNPATH,

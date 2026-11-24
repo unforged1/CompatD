@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Driver recommendation engine.
 
 Rules map detected hardware to Debian packages. Each rule lists *slots*, and each slot

@@ -91,4 +91,9 @@ Run the tests with `make test`.
 
 Debian and MX detection and themes are covered by unit tests. They still need real-world testing before a 1.0 release.
 
-License: GPL-3.0-or-later.
+## License
+Copyright © 2026 unforged1
+
+CompatD is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE), or **License** in the app's menu.
+
+The GPLv3 logo (`data/gplv3.svg`) is by the Free Software Foundation. It is in the public domain and is a trademark of the FSF.

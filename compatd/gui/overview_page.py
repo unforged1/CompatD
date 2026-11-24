@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Overview page: system data at a glance plus quick actions."""
 from __future__ import annotations
 

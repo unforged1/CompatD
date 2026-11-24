@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """User settings, stored as JSON in $XDG_CONFIG_HOME/compatd/config.json."""
 from __future__ import annotations
 

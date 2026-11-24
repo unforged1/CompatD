@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Per-distribution colour themes, rendered to GTK3 CSS."""
 from __future__ import annotations
 
@@ -221,6 +223,7 @@ window.compatd, window.compatd > .background, .compatd .cd-page { background-col
   background-color: @cd_terminal_bg; color: @cd_terminal_fg; font-family: monospace; font-size: 10pt;
 }
 .compatd textview.cd-detail, .compatd textview.cd-detail text { background-color: @cd_surface; color: @cd_fg; }
+.compatd .cd-logo-card { background-color: #ffffff; border-radius: 10px; }
 .compatd .cd-banner { background-color: @cd_accent_soft; border: 1px solid @cd_accent; border-radius: 10px; padding: 10px 14px; }
 .compatd separator { background-color: @cd_border; }
 .compatd paned > separator { background-color: @cd_border; min-width: 1px; min-height: 1px; }

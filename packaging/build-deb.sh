@@ -1,4 +1,6 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 # Build a .deb of CompatD with dpkg-deb (no debhelper needed).
 # Usage: packaging/build-deb.sh            -> dist/compatd_<version>_all.deb
 set -eu
@@ -25,14 +27,23 @@ done)
 install -m 0755 "$top/bin/compatd" "$pkgroot/usr/bin/compatd"
 install -m 0644 "$top/data/compatd.desktop" "$pkgroot/usr/share/applications/compatd.desktop"
 install -m 0644 "$top/data/compatd.svg" "$pkgroot/usr/share/icons/hicolor/scalable/apps/compatd.svg"
+install -D -m 0644 "$top/data/gplv3.svg" "$pkgroot/usr/share/compatd/gplv3.svg"
 install -m 0644 "$top/README.md" "$pkgroot/usr/share/doc/compatd/README.md"
 install -m 0644 "$top/CHANGELOG.md" "$pkgroot/usr/share/doc/compatd/CHANGELOG.md"
 cat > "$pkgroot/usr/share/doc/compatd/copyright" <<EOF
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: CompatD
+
 Files: *
+Copyright: 2026 unforged1
 License: GPL-3+
  On Debian systems the full text is in /usr/share/common-licenses/GPL-3.
+
+Files: usr/share/compatd/gplv3.svg
+Copyright: Free Software Foundation
+License: public-domain
+ The GPLv3 logo is in the public domain. It is a trademark of the
+ Free Software Foundation.
 EOF
 
 size="$(du -sk "$pkgroot" | cut -f1)"

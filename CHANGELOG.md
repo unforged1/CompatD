@@ -11,6 +11,8 @@ First pre-release.
 - Directory scanner with a built-in ELF parser. It finds wrong architectures, missing libraries, too-new glibc, foreign loaders, AppImage FUSE problems, kernel module vermagic mismatches, script interpreter problems, Python 2 code, broken launchers and services, .deb dependency problems, foreign package formats, and Windows/macOS programs with native alternatives.
 - Markdown and JSON report export, a CLI (`info`, `drivers`, `system`, `scan`) and a .deb builder.
 
+- License dialog in the main menu with the GPLv3 logo, copyright notice and full license text. About now shows the copyright holder (unforged1).
+
 ### Fixes from LMDE 7 testing
 - Repository checks now recognise Debian mirrors (any `/debian` or `/debian-security` archive), not only `*.debian.org`. A mixed-release source on LMDE's regional mirror, or a Debian mirror added to Kali, was going unreported.
 - Packages from older kernels get their own finding with a "Remove old kernels" fix, instead of being lumped in with unmaintained .debs. Kernels newer than the running one are never offered for removal.

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Compatibility page: scan this device or a directory for faults and fix them."""
 from __future__ import annotations
 

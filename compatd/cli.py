@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Command-line entry point. Without a sub-command the GUI is started."""
 from __future__ import annotations
 

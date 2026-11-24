@@ -21,10 +21,13 @@ install:
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/compatd
 	install -Dm644 data/compatd.desktop $(DESTDIR)$(PREFIX)/share/applications/compatd.desktop
 	install -Dm644 data/compatd.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/compatd.svg
+	install -Dm644 data/gplv3.svg $(DESTDIR)$(PREFIX)/share/compatd/gplv3.svg
+	install -Dm644 LICENSE $(DESTDIR)$(PREFIX)/share/compatd/LICENSE
 
 uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/lib/compatd
 	rm -f $(DESTDIR)$(PREFIX)/bin/compatd $(DESTDIR)$(PREFIX)/share/applications/compatd.desktop $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/compatd.svg
+	rm -rf $(DESTDIR)$(PREFIX)/share/compatd
 
 clean:
 	rm -rf build dist

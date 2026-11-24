@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Main application window."""
 from __future__ import annotations
 
@@ -11,7 +13,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
-from .. import __app_id__, __app_name__, __version__, distro, themes  # noqa: E402
+from .. import __app_id__, __app_name__, __copyright__, __version__, data_file, distro, license_text, themes  # noqa: E402
 from ..actions import Runner  # noqa: E402
 from ..config import Config  # noqa: E402
 from ..models import Action  # noqa: E402
@@ -74,6 +76,7 @@ class MainWindow(Gtk.ApplicationWindow):
         menu = Gio.Menu()
         menu.append("Refresh everything", "win.refresh")
         menu.append("Toggle fullscreen (F11)", "win.fullscreen")
+        menu.append("License", "win.license")
         menu.append("About CompatD", "win.about")
         menu.append("Quit", "app.quit")
         mb = Gtk.MenuButton()
@@ -88,7 +91,7 @@ class MainWindow(Gtk.ApplicationWindow):
         hb.pack_end(self.spinner)
         self.set_titlebar(hb)
 
-        for name, cb in (("refresh", lambda *_: self.refresh_all()), ("fullscreen", lambda *_: self.toggle_fullscreen()), ("about", lambda *_: self.show_about())):
+        for name, cb in (("refresh", lambda *_: self.refresh_all()), ("fullscreen", lambda *_: self.toggle_fullscreen()), ("about", lambda *_: self.show_about()), ("license", lambda *_: self.show_license())):
             act = Gio.SimpleAction.new(name, None)
             act.connect("activate", cb)
             self.add_action(act)
@@ -216,8 +219,75 @@ class MainWindow(Gtk.ApplicationWindow):
             "Driver and compatibility manager for Debian-based distributions.\n"
             "Detected: %s (%s theme)" % (self.distro.pretty_name, distro.FAMILY_LABELS.get(self.theme_family()))
         )
+        dlg.set_copyright(__copyright__)
         dlg.set_license_type(Gtk.License.GPL_3_0)
         dlg.run()
+        dlg.destroy()
+
+    def show_license(self) -> None:
+        dlg = Gtk.Dialog(title="License", transient_for=self, modal=True)
+        dlg.get_style_context().add_class("compatd")  # use the app theme, not the system one
+        dlg.add_button("Read online", 1)
+        dlg.add_button("Close", Gtk.ResponseType.CLOSE)
+        dlg.set_default_size(min(760, self.get_allocated_width() - 80), min(720, self.get_allocated_height() - 80))
+        box = dlg.get_content_area()
+        box.set_spacing(10)
+        for side in ("top", "bottom", "start", "end"):
+            getattr(box, "set_margin_" + side)(18)
+
+        top = Gtk.Box(spacing=18)
+        logo_path = data_file("gplv3.svg")
+        if logo_path:
+            try:
+                from gi.repository import GdkPixbuf
+
+                pix = GdkPixbuf.Pixbuf.new_from_file_at_scale(logo_path, 180, -1, True)
+                frame = Gtk.EventBox()  # white card: the logo's dark red has poor contrast on dark themes
+                w.add_class(frame, "cd-logo-card")
+                img = Gtk.Image.new_from_pixbuf(pix)
+                for side in ("top", "bottom", "start", "end"):
+                    getattr(img, "set_margin_" + side)(12)
+                frame.add(img)
+                frame.set_valign(Gtk.Align.CENTER)
+                top.pack_start(frame, False, False, 0)
+            except GLib.Error:
+                pass
+        info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        info.set_valign(Gtk.Align.CENTER)
+        info.pack_start(w.label("%s %s" % (__app_name__, __version__), "cd-page-title"), False, False, 0)
+        info.pack_start(w.label(__copyright__, selectable=True), False, False, 0)
+        info.pack_start(
+            w.label(
+                "This program is free software: you can redistribute it and/or modify it under the terms of the "
+                "GNU General Public License as published by the Free Software Foundation, either version 3 of the "
+                "License, or (at your option) any later version.\n\n"
+                "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even "
+                "the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+                "cd-muted",
+                wrap=True,
+            ),
+            False,
+            False,
+            4,
+        )
+        top.pack_start(info, True, True, 0)
+        box.pack_start(top, False, False, 0)
+
+        text = license_text() or "The full license text was not found. Read it at https://www.gnu.org/licenses/gpl-3.0.html"
+        view = Gtk.TextView(editable=False, cursor_visible=False, monospace=True, wrap_mode=Gtk.WrapMode.WORD_CHAR)
+        view.get_buffer().set_text(text)
+        for side in ("top", "bottom", "left", "right"):
+            getattr(view, "set_%s_margin" % side)(10)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        sw.set_propagate_natural_height(False)
+        sw.set_min_content_height(240)
+        w.add_class(sw, "cd-framed")
+        sw.add(view)
+        box.pack_start(sw, True, True, 0)
+        dlg.show_all()
+        while dlg.run() == 1:
+            Gtk.show_uri_on_window(dlg, "https://www.gnu.org/licenses/gpl-3.0.html", Gdk.CURRENT_TIME)
         dlg.destroy()
 
     # -- busy state / refresh ------------------------------------------------------------------
@@ -326,6 +396,17 @@ class CompatDApp(Gtk.Application):
                 GLib.timeout_add(int(os.environ.get("COMPATD_SCREENSHOT_DELAY", "4000")), self._screenshot, shot)
         self.window.present()
 
+    def _snap_license(self, path: str) -> None:
+        import cairo
+
+        for top in Gtk.Window.list_toplevels():
+            if isinstance(top, Gtk.Dialog) and top.get_title() == "License" and top.get_visible():
+                a = top.get_allocation()
+                surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, a.width, a.height)
+                top.draw(cairo.Context(surface))
+                surface.write_to_png("%s-license.png" % path)
+                top.response(Gtk.ResponseType.CLOSE)
+
     def _screenshot(self, path: str) -> bool:
         """Testing aid: render the window to PNG files and quit (COMPATD_SCREENSHOT=/path/prefix)."""
         import cairo
@@ -342,6 +423,11 @@ class CompatDApp(Gtk.Application):
                 win.config.theme = page.split(":", 1)[1]
                 win.apply_theme()
                 page = "overview"
+            elif page == "license":
+                GLib.timeout_add(300, lambda: self._snap_license(path) and False)
+                self.window.show_license()
+                GLib.idle_add(lambda: snap(i + 1) and False)
+                return False
             elif page == "system-scan":
                 win.go("compat")
                 win.compat.start_system_scan()

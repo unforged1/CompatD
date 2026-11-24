@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Unit tests for CompatD's non-GUI logic. Run with: python3 -m unittest discover -s tests"""
 from __future__ import annotations
 

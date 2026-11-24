@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Index of shared libraries available on the host (from the ld.so cache)."""
 from __future__ import annotations
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Small helpers for running system commands safely (no shell, with timeouts)."""
 from __future__ import annotations
 

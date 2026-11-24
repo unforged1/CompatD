@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Queries against dpkg / apt. All read-only; nothing here needs root."""
 from __future__ import annotations
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 unforged1
 """Whole-device compatibility checks (drivers, firmware, apt health, repositories)."""
 from __future__ import annotations
 
