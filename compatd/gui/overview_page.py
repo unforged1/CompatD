@@ -98,7 +98,7 @@ class OverviewPage(Gtk.ScrolledWindow):
             self.banner_icon.set_from_icon_name("software-update-available-symbolic", Gtk.IconSize.DND)
             self.banner_text.set_text("All devices have drivers. %d recommended package(s) can improve support." % len(to_install))
         else:
-            self.banner_icon.set_from_icon_name("emblem-ok-symbolic", Gtk.IconSize.DND)
+            w.set_icon(self.banner_icon, "emblem-ok-symbolic", Gtk.IconSize.DND)
             self.banner_text.set_text("All detected devices have drivers and the recommended packages are installed.")
 
         for child in self.hw_grid.get_children():

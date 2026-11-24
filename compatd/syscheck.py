@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 from typing import Callable, List, Optional
 
 from . import hardware, packages
@@ -42,6 +43,27 @@ UBUNTU_CODENAMES = {"bionic", "focal", "jammy", "lunar", "mantic", "noble", "ora
 DEBIAN_SUITES = {"stable", "testing", "unstable", "sid", "bullseye", "bookworm", "trixie", "forky", "duke", "oldstable", "experimental"}
 
 ProgressFn = Callable[[int, str], None]
+
+# Hosts of other distributions' archives. Their URLs can contain "/debian" too
+# (e.g. Kali's mirrors, MX's repo), so they never count as a Debian archive.
+NON_DEBIAN_HOSTS = ("kali.org", "kali.download", "linuxmint", "mxrepo", "mxlinux", "mx-linux")
+
+
+def is_debian_archive(uri: str) -> bool:
+    """True for deb.debian.org, security.debian.org and Debian mirrors.
+
+    LMDE's mirror picker (and many users) select a regional mirror such as
+    http://ftp.cz.debian.org/debian or http://debian.example.net/debian, so
+    matching "debian.org" alone misses them. Mirrors serve the archive at a
+    /debian or /debian-security path.
+    """
+    uri = uri.lower().rstrip("/")
+    if any(h in uri for h in NON_DEBIAN_HOSTS):
+        return False
+    if "debian.org" in uri:
+        return True
+    path = re.sub(r"^[a-z0-9+]+://[^/]*", "", uri)
+    return any(seg in ("debian", "debian-security") for seg in path.split("/"))
 
 
 def firmware_package(fw: str) -> Optional[List[str]]:
@@ -179,7 +201,7 @@ def check_repositories(distro: DistroInfo) -> List[Finding]:
                     "Remove this source and use Debian packages, backports or Flatpak instead.",
                 )
             )
-        elif distro.family == "kali" and "debian.org" in uri:
+        elif distro.family == "kali" and is_debian_archive(uri):
             out.append(
                 Finding(
                     "critical",
@@ -190,7 +212,7 @@ def check_repositories(distro: DistroInfo) -> List[Finding]:
                     "Remove this source; Kali's own repo (kali-rolling) is the only supported one.",
                 )
             )
-    suites = {str(s["suite"]).split("-")[0] for s in debs if "debian.org" in str(s["uri"])}
+    suites = {str(s["suite"]).split("/")[0].split("-")[0] for s in debs if is_debian_archive(str(s["uri"]))}
     releases = suites & DEBIAN_SUITES
     if len(releases) > 1 and distro.family in ("debian", "mx", "lmde"):
         out.append(
@@ -215,6 +237,31 @@ def check_repositories(distro: DistroInfo) -> List[Finding]:
                 "Add 'non-free-firmware' (and 'contrib non-free' for NVIDIA) to the Components of your sources.",
             )
         )
+    return out
+
+
+_KERNEL_PKG = re.compile(r"^linux-(?:image|headers|kbuild|modules|modules-extra|support)-(\d+)\.(\d+)(?:\.(\d+))?")
+
+
+def _kernel_version(text: str) -> Optional[tuple]:
+    m = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?", text)
+    return tuple(int(x or 0) for x in m.groups()) if m else None
+
+
+def old_kernel_packages(pkgs: List[str], running: str) -> List[str]:
+    """Kernel packages for versions strictly older than the running kernel.
+
+    Newer ones are left alone: they may be a custom build or an upgrade that
+    is waiting for a reboot.
+    """
+    cur = _kernel_version(running)
+    if cur is None:
+        return []
+    out = []
+    for pkg in pkgs:
+        m = _KERNEL_PKG.match(pkg)
+        if m and tuple(int(x or 0) for x in m.groups()) < cur:
+            out.append(pkg)
     return out
 
 
@@ -260,6 +307,22 @@ def check_dpkg_health() -> List[Finding]:
         )
     rc, out_list, _ = run(["apt", "list", "--installed"], timeout=90)
     local = [line.split("/")[0] for line in out_list.splitlines() if line.endswith("[installed,local]")]
+    old_kernels = old_kernel_packages(local, kernel_release())
+    if old_kernels:
+        out.append(
+            Finding(
+                "info",
+                "Packages",
+                "linux-image",
+                "%d package(s) from older kernels" % len(old_kernels),
+                ", ".join(old_kernels),
+                "These kernels were dropped from the archive and are no longer updated. You are running %s. "
+                "Remove them to free space in /boot, or keep the newest one as a fallback if you have not tested the running kernel yet."
+                % kernel_release(),
+                Action("Remove old kernels", [["apt-get", "purge", "-y"] + old_kernels], packages=old_kernels),
+            )
+        )
+        local = [p for p in local if p not in old_kernels]
     if local:
         out.append(
             Finding(

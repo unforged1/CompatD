@@ -17,7 +17,8 @@ from compatd.config import Config  # noqa: E402
 from compatd.models import Action, Finding  # noqa: E402
 from compatd.report import write_report  # noqa: E402
 from compatd.scanner import ScanOptions, Scanner, _unmet_depends, fix_all_action  # noqa: E402
-from compatd.syscheck import firmware_package  # noqa: E402
+from compatd import syscheck  # noqa: E402
+from compatd.syscheck import firmware_package, is_debian_archive, old_kernel_packages  # noqa: E402
 
 
 def fake_root(files):
@@ -195,6 +196,24 @@ class ScannerTests(unittest.TestCase):
         self.assertNotIn(["sed", "-i", "x", "f"], act.commands)
 
 
+    @unittest.skipUnless(shutil.which("gcc"), "gcc not installed")
+    def test_plugin_finds_bundle_libs(self):
+        """A dlopen'd plugin deep inside an app bundle uses the bundle's private libs."""
+        src = self.write("l.c", "void f(void){}\n")
+        app = os.path.join(self.dir, "app")
+        plugdir = os.path.join(app, "plugins", "x", "0.1")
+        os.makedirs(plugdir)
+        lib = os.path.join(app, "libcompatdbundled.so")
+        subprocess.check_call(["gcc", "-shared", "-fPIC", "-Wl,-soname,libcompatdbundled.so", "-o", lib, src])
+        subprocess.check_call(["gcc", "-shared", "-fPIC", "-o", os.path.join(plugdir, "libplug.so"), src, "-Wl,--no-as-needed", lib])
+        os.remove(src)
+        self.assertEqual(self.scan(), [])
+        # Without the bundle lib the plugin is still reported.
+        os.remove(lib)
+        f = self.scan()
+        self.assertEqual([x.category for x in f], ["Missing library"], self.titles(f))
+
+
 class PackageTests(unittest.TestCase):
     def test_soname_guesses(self):
         self.assertIn("libssl1.1", packages.soname_package_guesses("libssl.so.1.1"))
@@ -215,6 +234,46 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(firmware_package("iwlwifi-ty-a0-gf-a0-89.ucode"), ["firmware-iwlwifi"])
         self.assertEqual(firmware_package("rtw89/rtw8852b_fw.bin"), ["firmware-realtek"])
         self.assertIsNone(firmware_package("totally/unknown.bin"))
+
+
+class RepoTests(unittest.TestCase):
+    def test_debian_archive_detection(self):
+        for uri in ("http://deb.debian.org/debian", "http://security.debian.org/", "http://ftp.cz.debian.org/debian/",
+                    "http://debian.superhosting.cz/debian", "https://mirror.example.net/debian-security"):
+            self.assertTrue(is_debian_archive(uri), uri)
+        for uri in ("http://http.kali.org/kali", "https://mirror.karneval.cz/pub/linux/linuxmint/packages",
+                    "https://repo.steampowered.com/steam/", "http://mxrepo.com/mx/repo/", "https://kali.download/debian"):
+            self.assertFalse(is_debian_archive(uri), uri)
+
+    def _check(self, sources, family="lmde"):
+        real = packages.apt_sources
+        packages.apt_sources = lambda: [dict(file="/etc/apt/test.list", type="deb", uri=u, suite=s, components=["main", "non-free-firmware"]) for u, s in sources]
+        try:
+            return [f.title for f in syscheck.check_repositories(distro.DistroInfo(family=family))]
+        finally:
+            packages.apt_sources = real
+
+    def test_lmde_mirror_mixed_release(self):
+        lmde = [("https://mirror.karneval.cz/pub/linux/linuxmint/packages", "gigi"),
+                ("http://debian.superhosting.cz/debian", "trixie"),
+                ("http://debian.superhosting.cz/debian", "trixie-backports"),
+                ("http://security.debian.org/", "trixie-security"),
+                ("https://repo.steampowered.com/steam/", "stable")]
+        self.assertFalse([t for t in self._check(lmde) if "Mixed" in t])
+        mixed = self._check(lmde + [("http://debian.superhosting.cz/debian", "bookworm")])
+        self.assertIn("Mixed Debian releases: bookworm, trixie", mixed)
+
+    def test_debian_mirror_on_kali(self):
+        titles = self._check([("http://http.kali.org/kali", "kali-rolling"), ("http://ftp.de.debian.org/debian", "trixie")], "kali")
+        self.assertEqual(titles.count("Debian repository added to Kali"), 1)
+
+    def test_old_kernels(self):
+        pkgs = ["czgram", "linux-image-6.12.48+deb13-amd64", "linux-headers-6.12.48+deb13-common", "linux-kbuild-6.12.48+deb13",
+                "linux-image-6.15.2-custom", "linux-image-amd64", "linux-image-6.12.117+deb13-amd64"]
+        self.assertEqual(
+            old_kernel_packages(pkgs, "6.12.117+deb13-amd64"),
+            ["linux-image-6.12.48+deb13-amd64", "linux-headers-6.12.48+deb13-common", "linux-kbuild-6.12.48+deb13"],
+        )
 
 
 class MiscTests(unittest.TestCase):

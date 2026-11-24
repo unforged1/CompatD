@@ -334,6 +334,17 @@ class Scanner:
         # Heuristic: bundled apps ship their libs next to the binary or in ../lib and
         # set LD_LIBRARY_PATH from a wrapper script.
         dirs += [origin, os.path.join(origin, "lib"), os.path.join(origin, "..", "lib"), os.path.join(origin, "libs")]
+        if info.etype == elfinfo.ET_DYN and not info.interp:
+            # A plugin (e.g. /opt/firefox/gmp-clearkey/0.1/libclearkey.so) is dlopen'd by a
+            # host program that has already loaded the app's private libraries, which live
+            # higher up in the bundle (/opt/firefox/libmozsqlite3.so).
+            d = origin
+            for _ in range(3):
+                parent = os.path.dirname(d)
+                if parent == d or parent in ("/", "/opt", "/usr", os.path.expanduser("~")):
+                    break
+                d = parent
+                dirs += [d, os.path.join(d, "lib")]
         missing = [lib for lib in info.needed if not self.index.find(lib, arch, dirs)]
         if missing:
             out.append(self._missing_libs_finding(path, info, missing))

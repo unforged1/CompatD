@@ -84,6 +84,11 @@ Run the tests with `make test`.
 * Commands are argv lists that are quoted before they reach the shell. File paths are never interpolated unquoted.
 
 ## Status
-0.1.0 is the first feature-complete build. It has been tested on Kali rolling (amd64, NVIDIA + AMD hybrid laptop). Debian, MX and LMDE detection and themes are covered by unit tests. The app still needs real-world testing on those distributions before a 1.0 release.
+0.1.0 is the first feature-complete build. It has been tested on real hardware on:
+
+* Kali rolling (amd64, NVIDIA + AMD hybrid laptop)
+* LMDE 7 "gigi" (amd64, Cinnamon on X11, AMD Ryzen 7 7735HS + Radeon 680M with an NVIDIA RTX 4060 laptop GPU)
+
+Debian and MX detection and themes are covered by unit tests. They still need real-world testing before a 1.0 release.
 
 License: GPL-3.0-or-later.

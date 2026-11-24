@@ -10,3 +10,9 @@ First pre-release.
 - Device compatibility checks: unbound devices, missing firmware, repository mix-ups, dpkg health, DKMS, Secure Boot and Wayland.
 - Directory scanner with a built-in ELF parser. It finds wrong architectures, missing libraries, too-new glibc, foreign loaders, AppImage FUSE problems, kernel module vermagic mismatches, script interpreter problems, Python 2 code, broken launchers and services, .deb dependency problems, foreign package formats, and Windows/macOS programs with native alternatives.
 - Markdown and JSON report export, a CLI (`info`, `drivers`, `system`, `scan`) and a .deb builder.
+
+### Fixes from LMDE 7 testing
+- Repository checks now recognise Debian mirrors (any `/debian` or `/debian-security` archive), not only `*.debian.org`. A mixed-release source on LMDE's regional mirror, or a Debian mirror added to Kali, was going unreported.
+- Packages from older kernels get their own finding with a "Remove old kernels" fix, instead of being lumped in with unmaintained .debs. Kernels newer than the running one are never offered for removal.
+- The scanner no longer reports missing libraries for plugins inside app bundles (e.g. Firefox's `gmp-clearkey`) when the library ships higher up in the same bundle.
+- Icons that the Mint-Y and current Adwaita themes lack (the Overview success banner, the Apply fix button, the Detected family card) now fall back to available ones.

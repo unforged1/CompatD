@@ -7,7 +7,22 @@ from typing import Any, Callable, Optional
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, Gtk, Pango  # noqa: E402
+from gi.repository import Gio, GLib, Gtk, Pango  # noqa: E402
+
+# Icons that some themes lack (Mint-Y on LMDE, current Adwaita), with stand-ins.
+ICON_FALLBACKS = {
+    "emblem-ok-symbolic": ["object-select-symbolic"],
+    "emblem-system-symbolic": ["preferences-system-symbolic", "applications-system-symbolic"],
+}
+
+
+def icon_image(name: str, size: Gtk.IconSize) -> Gtk.Image:
+    """Gtk.Image for a themed icon, falling back when the theme does not have it."""
+    return Gtk.Image.new_from_gicon(Gio.ThemedIcon.new_from_names([name] + ICON_FALLBACKS.get(name, [])), size)
+
+
+def set_icon(img: Gtk.Image, name: str, size: Gtk.IconSize) -> None:
+    img.set_from_gicon(Gio.ThemedIcon.new_from_names([name] + ICON_FALLBACKS.get(name, [])), size)
 
 
 def run_async(work: Callable[[], Any], done: Callable[[Any, Optional[BaseException]], None]) -> threading.Thread:
@@ -77,7 +92,7 @@ class InfoCard(Gtk.Box):
         add_class(self, "cd-card")
         head = Gtk.Box(spacing=6)
         if icon:
-            img = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.MENU)
+            img = icon_image(icon, Gtk.IconSize.MENU)
             add_class(img, "cd-muted")
             head.pack_start(img, False, False, 0)
         head.pack_start(label(title.upper(), "cd-card-title"), True, True, 0)
@@ -99,7 +114,7 @@ def button(text: str, icon: Optional[str] = None, primary: bool = False, tooltip
     btn = Gtk.Button()
     box = Gtk.Box(spacing=6)
     if icon:
-        box.pack_start(Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.BUTTON), False, False, 0)
+        box.pack_start(icon_image(icon, Gtk.IconSize.BUTTON), False, False, 0)
     box.pack_start(Gtk.Label(label=text), False, False, 0)
     btn.add(box)
     if primary:
