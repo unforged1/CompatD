@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-labelledby="t d">
+  <title id="t">CompatD</title>
+  <desc id="d">CompatD: driver and compatibility manager for Debian-based Linux</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#121412"/>
+      <stop offset="1" stop-color="#1f2220"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.2" cy="0.5" r="0.45">
+      <stop offset="0" stop-color="#8bc34a" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#8bc34a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9ccc65"/>
+      <stop offset="1" stop-color="#4f7d2b"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#8bc34a" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <clipPath id="frame"><rect width="1280" height="320" rx="18"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="320" fill="url(#bg)"/>
+    <rect width="1280" height="320" fill="url(#grid)"/>
+    <rect width="1280" height="320" fill="url(#glow)"/>
+
+    <!-- circuit traces, right side -->
+    <g fill="none" stroke="#8bc34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.35">
+      <path d="M1280 70H1180L1150 100H1080"/>
+      <path d="M1280 150H1200L1180 170H1110"/>
+      <path d="M1280 260H1170L1140 230H1070"/>
+    </g>
+    <g fill="#8bc34a" fill-opacity="0.55">
+      <circle cx="1080" cy="100" r="5"/>
+      <circle cx="1110" cy="170" r="5"/>
+      <circle cx="1070" cy="230" r="5"/>
+    </g>
+
+    <!-- bottom accent bar -->
+    <rect y="314" width="1280" height="6" fill="#8bc34a"/>
+  </g>
+
+  <!-- logo (CompatD chip), mint variant -->
+  <g transform="translate(96 70) scale(1.4)">
+    <rect x="8" y="8" width="112" height="112" rx="26" fill="url(#tile)"/>
+    <rect x="34" y="34" width="60" height="60" rx="10" fill="none" stroke="#ffffff" stroke-width="6"/>
+    <g stroke="#ffffff" stroke-width="5" stroke-linecap="round">
+      <line x1="50" y1="22" x2="50" y2="34"/><line x1="64" y1="22" x2="64" y2="34"/><line x1="78" y1="22" x2="78" y2="34"/>
+      <line x1="50" y1="94" x2="50" y2="106"/><line x1="64" y1="94" x2="64" y2="106"/><line x1="78" y1="94" x2="78" y2="106"/>
+      <line x1="22" y1="50" x2="34" y2="50"/><line x1="22" y1="64" x2="34" y2="64"/><line x1="22" y1="78" x2="34" y2="78"/>
+      <line x1="94" y1="50" x2="106" y2="50"/><line x1="94" y1="64" x2="106" y2="64"/><line x1="94" y1="78" x2="106" y2="78"/>
+    </g>
+    <path d="M48 65 L59 76 L81 52" fill="none" stroke="#14200a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- wordmark -->
+  <g font-family="'Segoe UI', Ubuntu, Cantarell, 'Noto Sans', 'DejaVu Sans', Helvetica, Arial, sans-serif">
+    <text x="330" y="165" font-size="104" font-weight="700" fill="#e6ebe5" letter-spacing="-1" textLength="452" lengthAdjust="spacingAndGlyphs">Compat<tspan fill="#8bc34a">D</tspan></text>
+    <text x="334" y="212" font-size="28" fill="#97a395" textLength="694" lengthAdjust="spacingAndGlyphs">Driver &amp; compatibility manager for Debian-based Linux</text>
+    <g font-size="18" font-weight="700" letter-spacing="1.5">
+      <rect x="334" y="236" width="92" height="30" rx="15" fill="#8bc34a" fill-opacity="0.16" stroke="#8bc34a" stroke-opacity="0.6"/>
+      <text x="380" y="257" fill="#8bc34a" text-anchor="middle">v0.1.0</text>
+      <rect x="438" y="236" width="132" height="30" rx="15" fill="#8bc34a" fill-opacity="0.16" stroke="#8bc34a" stroke-opacity="0.6"/>
+      <text x="504" y="257" fill="#8bc34a" text-anchor="middle">GPL-3.0+</text>
+      <rect x="582" y="236" width="100" height="30" rx="15" fill="#8bc34a" fill-opacity="0.16" stroke="#8bc34a" stroke-opacity="0.6"/>
+      <text x="632" y="257" fill="#8bc34a" text-anchor="middle">GTK 3</text>
+    </g>
+  </g>
+</svg>

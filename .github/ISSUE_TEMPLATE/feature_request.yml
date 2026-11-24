@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest a new check, driver rule or improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the situation first, for example a driver or compatibility issue CompatD doesn't catch.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What should CompatD do?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds you know of
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution it matters for
+      placeholder: e.g. Debian 13, MX 23, all

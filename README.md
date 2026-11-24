@@ -1,4 +1,13 @@
-# CompatD
+<p align="center">
+  <img src="docs/banner.svg" alt="CompatD: driver and compatibility manager for Debian-based Linux" width="100%">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/DEBIAN-NATIVE-323733?style=for-the-badge&logo=debian&logoColor=D70A53&labelColor=161917" alt="Debian: native">
+  <img src="https://img.shields.io/badge/NVIDIA-SUPPORTED-323733?style=for-the-badge&logo=nvidia&logoColor=76B900&labelColor=161917" alt="NVIDIA: supported">
+  <img src="https://img.shields.io/badge/INTEL-SUPPORTED-323733?style=for-the-badge&logo=intel&logoColor=00C7FD&logoSize=auto&labelColor=161917" alt="Intel: supported">
+  <img src="https://img.shields.io/badge/AMD-SUPPORTED-323733?style=for-the-badge&logo=amd&logoColor=ED1C24&logoSize=auto&labelColor=161917" alt="AMD: supported">
+</p>
 
 **Driver and compatibility manager for Debian-based Linux.** Version **0.1.0**, a pre-release until it has been tested more widely.
 
@@ -90,6 +99,11 @@ Run the tests with `make test`.
 * LMDE 7 "gigi" (amd64, Cinnamon on X11, AMD Ryzen 7 7735HS + Radeon 680M with an NVIDIA RTX 4060 laptop GPU)
 
 Debian and MX detection and themes are covered by unit tests. They still need real-world testing before a 1.0 release.
+
+## Contributing
+Bug reports, hardware test reports and pull requests are welcome. Reports from Debian and MX Linux machines help most right now. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report a problem, run the tests and send changes. Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+To report a security problem, follow [SECURITY.md](SECURITY.md). Please don't open a public issue for it.
 
 ## License
 Copyright © 2026 unforged1

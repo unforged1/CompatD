@@ -1,0 +1,54 @@
+name: Hardware test report
+description: Tell us how CompatD works on your machine, good or bad
+labels: ["hardware-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reports from every machine help, especially Debian and MX Linux, which haven't been tested on real hardware yet.
+  - type: dropdown
+    id: distro
+    attributes:
+      label: Distribution
+      options:
+        - Debian
+        - MX Linux
+        - LMDE
+        - Kali Linux
+        - Other Debian-based
+    validations:
+      required: true
+  - type: textarea
+    id: info
+    attributes:
+      label: Output of `compatd info`
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: drivers
+    attributes:
+      label: Output of `compatd drivers`
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: Output of `compatd system`
+      render: text
+  - type: dropdown
+    id: result
+    attributes:
+      label: Overall result
+      options:
+        - Everything detected correctly
+        - Mostly right, some problems (describe below)
+        - Wrong or broken (describe below)
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: What was wrong or missing?
+      description: Wrong drivers, missing recommendations, false findings, theme problems, anything else.

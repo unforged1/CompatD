@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in CompatD is wrong or broken
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For a security problem, follow [SECURITY.md](https://github.com/unforged1/CompatD/blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Drivers (detection or recommendations)
+        - Compatibility check of this device
+        - Directory scanner
+        - Installing or applying a fix
+        - GUI or theme
+        - CLI
+        - Packaging (.deb)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Compatibility
+        2. Scan ~/Downloads
+        3. ...
+  - type: textarea
+    id: info
+    attributes:
+      label: Output of `compatd info`
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Other output or screenshots
+      description: Relevant `compatd drivers`, `compatd system` or `compatd scan` output, or a screenshot. Check it for anything you don't want to share.
+  - type: input
+    id: version
+    attributes:
+      label: CompatD version
+      description: From About, or the commit if you run from source.
+      placeholder: 0.1.0
+    validations:
+      required: true
